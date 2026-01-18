@@ -18,6 +18,11 @@ on:
       - dev
     # Removed paths filter - this check is required by repository ruleset
     # so it must run on ALL PRs to prevent blocking merges
+  pull_request_target:
+    branches:
+      - main
+      - dev
+    # pull_request_target allows workflows to run on bot-created PRs
   workflow_dispatch:
     inputs:
       pr_number:
@@ -39,6 +44,13 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout repository (for manual runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Get PR details (for manual runs)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.pr_number != ''
         id: get_pr
